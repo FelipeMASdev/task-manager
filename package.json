@@ -1,0 +1,58 @@
+{
+  "name": "task-manager",
+  "version": "1.0.0",
+  "description": "Gerenciador de tarefas simples usando Node.js",
+  "main": "server.js",
+  "author": "Felipe Mendes",
+  "license": "ISC",
+  "type": "module",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "scripts": {
+    "update": "npx npm-check-updates --interactive --format group",
+    "dev": "nodemon",
+    "build": "tsc -p tsconfig.json",
+    "start": "node build/server.js",
+
+    "lint": "eslint src --ext .ts,.js,.json",
+    "lint:fix": "eslint src --ext .ts,.js,.json --fix",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    
+    "docker": "docker compose up -d",
+    "docker:dev": "docker compose --profile dev up -d --build",
+    "docker:prod": "docker compose --profile prod up -d --build",
+
+    "prisma:studio": "npx prisma studio",
+    "prisma:generate": "npx prisma generate",
+    "prisma:migrate:deploy": "npx prisma migrate deploy",
+    "prisma:migrate:dev": "npx prisma migrate dev",
+    "prisma:reset": "npx prisma migrate reset --force",
+    "prisma:seed": "tsx prisma/seed.ts"
+  },
+  "dependencies": {
+    "@prisma/adapter-pg": "^7.7.0",
+    "@prisma/client": "^7.7.0",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "pg": "^8.20.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@eslint/json": "^1.2.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.6.0",
+    "eslint": "^10.2.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "globals": "^17.5.0",
+    "nodemon": "^3.1.14",
+    "prettier": "^3.8.3",
+    "prisma": "^7.7.0",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.58.2"
+  }
+}

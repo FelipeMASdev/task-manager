@@ -1,0 +1,6 @@
+node_modules
+.specstory
+.docs
+.vscode
+.env
+/src/generated/prisma

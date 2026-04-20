@@ -1,0 +1,56 @@
+services:
+  postgres:
+    image: bitnami/postgresql:latest
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -h 127.0.0.1 -p 5432',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - task_manager_pg_data:/bitnami/postgresql
+
+  app:
+    profiles: ['prod']
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      PORT: ${PORT:-3333}
+    ports:
+      - '3333:3333'
+
+  app-dev:
+    profiles: ['dev']
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL_DOCKER}
+      PORT: ${PORT:-3333}
+    command: npm run dev
+    ports:
+      - '3334:3333'
+    volumes:
+      - ./src:/app/src
+      - ./nodemon.json:/app/nodemon.json
+
+volumes:
+  task_manager_pg_data:
