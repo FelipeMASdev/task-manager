@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
-    "module": "nodenext",
     "target": "esnext",
     "lib": ["esnext"],
+    "module": "nodenext",
+    "moduleResolution": "NodeNext",
 
     "rootDir": "./src",
     "outDir": "./build",
@@ -12,10 +13,13 @@
     },
 
     "types": [
-      "node"
+      "node",
+      "jest"
     ],
 
     "strict": true,
+    "allowJs": true,
+    "checkJs": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "sourceMap": true,
