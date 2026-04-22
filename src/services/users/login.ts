@@ -1,6 +1,5 @@
 import { prisma } from '@/prisma.js';
 import { AppError } from '@/utils/AppError.js';
-//import { Prisma } from '@/generated/prisma/client.js';
 import { compare } from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { authConfig } from '@/configs/auth.js';
