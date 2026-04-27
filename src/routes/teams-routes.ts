@@ -7,5 +7,18 @@ const teamsRoutes = Router();
 const teamsController = new TeamsController();
 
 teamsRoutes.post('/', verifyAuthentication, verifyAuthorization(['admin']), teamsController.create);
+teamsRoutes.get('/', verifyAuthentication, verifyAuthorization(['admin']), teamsController.list);
+teamsRoutes.patch(
+  '/:id',
+  verifyAuthentication,
+  verifyAuthorization(['admin']),
+  teamsController.update,
+);
+teamsRoutes.delete(
+  '/:id',
+  verifyAuthentication,
+  verifyAuthorization(['admin']),
+  teamsController.delete,
+);
 
 export { teamsRoutes };

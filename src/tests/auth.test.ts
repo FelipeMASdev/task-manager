@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../../app.js';
+import { app } from '../app.js';
 import { describe, it, expect } from '@jest/globals';
 import { prisma } from '@/prisma.js';
 import 'dotenv/config';
@@ -23,9 +23,6 @@ describe('POST /teams as a regular user', () => {
   it('should return 403 Forbidden', async () => {
     token = await memberLogin();
     const response = await createNewTeam(token);
-
-    console.log('Response status:', response.status);
-    console.log('Response body:', response.body);
 
     expect(response.status).toBe(403);
     expect(response.body.message).toBe('User not authorized');
