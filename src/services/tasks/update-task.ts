@@ -1,8 +1,15 @@
 import { prisma } from '@/prisma.js';
 import { AppError } from '@/utils/AppError.js';
 
+interface UpdateTaskData {
+  title?: string;
+  description?: string;
+  priority?: 'low' | 'medium' | 'high';
+  status: 'pending' | 'in_progress' | 'completed';
+}
+
 export async function updateTask(
-  updateData: object,
+  updateData: UpdateTaskData,
   teamID: number,
   taskID: number,
   user: { id: number; role: string },
@@ -45,18 +52,28 @@ export async function updateTask(
     }
   }
 
-  // Update the task in the database
-  await prisma.task.update({
-    where: {
-      id: taskID,
-    },
-    data: updateData,
-  });
+  // Update the task in the database and create a history record if the status has changed
+  const [updatedTask] = await prisma.$transaction([
+    prisma.task.update({
+      where: {
+        id: taskID,
+      },
+      data: updateData,
+    }),
 
-  // Retrieve the updated task from the database
-  const updatedTask = await prisma.task.findUnique({
-    where: { id: taskID },
-  });
+    ...(updateData.status && updateData.status !== task.status
+      ? [
+          prisma.taskHistory.create({
+            data: {
+              taskId: taskID,
+              changedBy: user.id,
+              oldStatus: task.status,
+              newStatus: updateData.status,
+            },
+          }),
+        ]
+      : []),
+  ]);
 
   // Return the updated task
   return updatedTask;

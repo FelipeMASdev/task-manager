@@ -113,7 +113,15 @@ class TasksController {
       }),
     });
 
-    const updateData = taskUpdateSchema.parse(req.body);
+    const updateBody = taskUpdateSchema.parse(req.body);
+
+    // structure the update data before calling the service
+    const updateData = {
+      ...(updateBody.title !== undefined ? { title: updateBody.title } : {}),
+      ...(updateBody.description !== undefined ? { description: updateBody.description } : {}),
+      ...(updateBody.priority !== undefined ? { priority: updateBody.priority } : {}),
+      status: updateBody.status,
+    };
 
     // Call the service function to update the task
     let updatedTask;

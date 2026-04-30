@@ -20,9 +20,6 @@ describe('PATCH /teams/:teamID/tasks/:taskID', () => {
   });
 
   afterAll(async () => {
-    adminToken = undefined;
-    memberToken = undefined;
-
     await request(app)
       .patch(`/teams/${teamID}/tasks/${unownedTaskID}`)
       .set('Authorization', `Bearer ${adminToken}`)
@@ -32,6 +29,20 @@ describe('PATCH /teams/:teamID/tasks/:taskID', () => {
         priority: 'low',
         status: 'pending',
       });
+
+    // reset the owned task to be assigned to the member and have its original title and description
+    await request(app)
+      .patch(`/teams/${teamID}/tasks/${ownedTaskID}`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({
+        title: 'Unupdated Task Title',
+        description: 'Unupdated Task Description',
+        priority: 'low',
+        status: 'pending',
+      });
+
+    adminToken = undefined;
+    memberToken = undefined;
   });
 
   it('should confirm task and team exist', async () => {
@@ -94,6 +105,7 @@ describe('PATCH /teams/:teamID/tasks/:taskID', () => {
         priority: 'high',
         status: 'in_progress',
       });
+
     expect(response.status).toBe(200);
     expect(response.body.task.title).toBe('Updated Task Title by Admin');
     expect(response.body.task.description).toBe('Updated Task Description by Admin');
@@ -113,6 +125,33 @@ describe('PATCH /teams/:teamID/tasks/:taskID', () => {
     expect(response.status).toBe(200);
     expect(response.body.task.title).toBe('Updated Task Title by Member');
     expect(response.body.task.description).toBe('Updated Task Description by Member');
+  });
+
+  it('should create a history record when the status is updated both by admin and member', async () => {
+    //since status was changed to in_progress in the previous test, we will just check if a history record was created for that change
+    let historyRecord = await prisma.taskHistory.findFirst({
+      where: {
+        taskId: unownedTaskID,
+        newStatus: 'in_progress',
+      },
+    });
+
+    expect(historyRecord).toBeDefined();
+    expect(historyRecord?.taskId).toBe(unownedTaskID);
+    expect(historyRecord?.oldStatus).toBe('pending');
+    expect(historyRecord?.newStatus).toBe('in_progress');
+
+    historyRecord = await prisma.taskHistory.findFirst({
+      where: {
+        taskId: ownedTaskID,
+        newStatus: 'in_progress',
+      },
+    });
+
+    expect(historyRecord).toBeDefined();
+    expect(historyRecord?.taskId).toBe(ownedTaskID);
+    expect(historyRecord?.oldStatus).toBe('pending');
+    expect(historyRecord?.newStatus).toBe('in_progress');
   });
 
   it('should not allow a member to update a task that is not assigned to them', async () => {
