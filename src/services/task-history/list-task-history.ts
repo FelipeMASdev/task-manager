@@ -11,6 +11,17 @@ export async function listTaskHistory({
   taskID: number;
   user: authenticatedUser;
 }) {
+  // Validate that the team exists
+  const team = await prisma.team.findUnique({
+    where: {
+      id: teamID,
+    },
+  });
+
+  if (!team) {
+    throw new AppError('Team not found', 404);
+  }
+
   // Validate that the task exists in the specified team
   const task = await prisma.task.findFirst({
     where: {
