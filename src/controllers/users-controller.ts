@@ -2,6 +2,7 @@ import { createUser } from '@/services/users/create-user.js';
 import type { Request, Response } from 'express';
 import { z } from 'zod';
 import { login } from '@/services/users/login.js';
+import { addAdmin } from '@/services/users/add-admin.js';
 
 class UsersController {
   async create(req: Request, res: Response) {
@@ -45,6 +46,24 @@ class UsersController {
 
     // Return a success response with the generated token and user information
     return res.json({ token, user });
+  }
+
+  async addAdmin(req: Request, res: Response) {
+    // Validate the request params using Zod
+    const paramsSchema = z.object({
+      userID: z.coerce.number({ error: 'A valid user ID is required as a number' }),
+    });
+
+    const { userID } = paramsSchema.parse(req.params);
+
+    // Call the addAdmin service to grant admin privileges to the user
+    const newAdmin = await addAdmin(userID);
+
+    // Return a success response
+    return res.status(200).json({
+      message: 'User promoted to admin successfully',
+      newAdmin,
+    });
   }
 }
 

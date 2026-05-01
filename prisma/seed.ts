@@ -53,85 +53,93 @@ async function main() {
   await prisma.team.deleteMany();
   await prisma.user.deleteMany();
 
-  const [admin, maria, joao, paula, carlos, lucia] = await Promise.all([
-    prisma.user.upsert({
-      where: { email: 'admin@taskmanager.com' },
-      update: {},
-      create: {
-        name: 'Admin',
-        email: 'admin@taskmanager.com',
-        password: await hashedPassword(),
-        role: 'admin',
-      },
-    }),
-    prisma.user.upsert({
-      where: { email: 'maria@taskmanager.com' },
-      update: {},
-      create: {
-        name: 'Maria',
-        email: 'maria@taskmanager.com',
-        password: await hashedPassword(),
-        role: 'member',
-      },
-    }),
-    prisma.user.upsert({
-      where: { email: 'joao@taskmanager.com' },
-      update: {},
-      create: {
-        name: 'Joao',
-        email: 'joao@taskmanager.com',
-        password: await hashedPassword(),
-        role: 'member',
-      },
-    }),
-    prisma.user.upsert({
-      where: { email: 'paula@taskmanager.com' },
-      update: {},
-      create: {
-        name: 'Paula',
-        email: 'paula@taskmanager.com',
-        password: await hashedPassword(),
-        role: 'member',
-      },
-    }),
-    prisma.user.upsert({
-      where: { email: 'carlos@taskmanager.com' },
-      update: {},
-      create: {
-        name: 'Carlos',
-        email: 'carlos@taskmanager.com',
-        password: await hashedPassword(),
-        role: 'member',
-      },
-    }),
-    prisma.user.upsert({
-      where: { email: 'lucia@taskmanager.com' },
-      update: {},
-      create: {
-        name: 'Lucia',
-        email: 'lucia@taskmanager.com',
-        password: await hashedPassword(),
-        role: 'member',
-      },
-    }),
-  ]);
+  // Keep creation deterministic so fixed-ID integration tests remain stable.
+  const password = await hashedPassword();
 
-  const [produto, engenharia, design] = await Promise.all([
-    ensureTeam('Produto', 'Time de Produto'),
-    ensureTeam('Engenharia', 'Time de Engenharia'),
-    ensureTeam('Design', 'Time de Design'),
-  ]);
+  const admin = await prisma.user.create({
+    data: {
+      name: 'Admin',
+      email: 'admin@taskmanager.com',
+      password,
+      role: 'admin',
+    },
+  });
 
-  await Promise.all([
-    ensureMembership(admin.id, produto.id),
-    ensureMembership(maria.id, produto.id),
-    ensureMembership(joao.id, engenharia.id),
-    ensureMembership(admin.id, engenharia.id),
-    ensureMembership(paula.id, produto.id),
-    ensureMembership(carlos.id, engenharia.id),
-    ensureMembership(lucia.id, design.id),
-    ensureMembership(maria.id, design.id),
-  ]);
+  const joao = await prisma.user.create({
+    data: {
+      name: 'Joao',
+      email: 'joao@taskmanager.com',
+      password,
+      role: 'member',
+    },
+  });
+
+  const maria = await prisma.user.create({
+    data: {
+      name: 'Maria',
+      email: 'maria@taskmanager.com',
+      password,
+      role: 'member',
+    },
+  });
+
+  const paula = await prisma.user.create({
+    data: {
+      name: 'Paula',
+      email: 'paula@taskmanager.com',
+      password,
+      role: 'member',
+    },
+  });
+
+  const carlos = await prisma.user.create({
+    data: {
+      name: 'Carlos',
+      email: 'carlos@taskmanager.com',
+      password,
+      role: 'member',
+    },
+  });
+
+  const lucia = await prisma.user.create({
+    data: {
+      name: 'Lucia',
+      email: 'lucia@taskmanager.com',
+      password,
+      role: 'member',
+    },
+  });
+
+  const produto = await prisma.team.create({
+    data: {
+      name: 'Produto',
+      description: 'Time de Produto',
+    },
+  });
+
+  const engenharia = await prisma.team.create({
+    data: {
+      name: 'Engenharia',
+      description: 'Time de Engenharia',
+    },
+  });
+
+  const design = await prisma.team.create({
+    data: {
+      name: 'Design',
+      description: 'Time de Design',
+    },
+  });
+
+  await ensureMembership(admin.id, produto.id);
+  await ensureMembership(paula.id, produto.id);
+  await ensureMembership(carlos.id, produto.id);
+
+  await ensureMembership(admin.id, engenharia.id);
+  await ensureMembership(maria.id, engenharia.id);
+  await ensureMembership(joao.id, engenharia.id);
+
+  await ensureMembership(lucia.id, design.id);
 
   const tasks = [
     {
@@ -145,7 +153,7 @@ async function main() {
     {
       title: 'Implementar autenticação',
       description: 'Criar fluxo de login e proteção de rotas da API.',
-      status: 'in_progress' as const,
+      status: 'pending' as const,
       priority: 'high' as const,
       assigneeId: joao.id,
       teamId: engenharia.id,
@@ -163,7 +171,7 @@ async function main() {
       description: 'Expor CRUD principal para task manager.',
       status: 'pending' as const,
       priority: 'high' as const,
-      assigneeId: carlos.id,
+      assigneeId: maria.id,
       teamId: engenharia.id,
     },
     {
@@ -171,7 +179,7 @@ async function main() {
       description: 'Consolidar indicadores para acompanhamento do time.',
       status: 'pending' as const,
       priority: 'medium' as const,
-      assigneeId: maria.id,
+      assigneeId: admin.id,
       teamId: produto.id,
     },
     {
@@ -185,7 +193,7 @@ async function main() {
     {
       title: 'Validar regras de negócio',
       description: 'Cobrir cenários de criação, atualização e remoção.',
-      status: 'completed' as const,
+      status: 'pending' as const,
       priority: 'medium' as const,
       assigneeId: admin.id,
       teamId: engenharia.id,
@@ -219,12 +227,6 @@ async function main() {
 
   const historyEntries = [
     {
-      taskId: createdTasks[1].id,
-      changedBy: joao.id,
-      oldStatus: 'pending' as const,
-      newStatus: 'in_progress' as const,
-    },
-    {
       taskId: createdTasks[2].id,
       changedBy: lucia.id,
       oldStatus: 'in_progress' as const,
@@ -232,15 +234,9 @@ async function main() {
     },
     {
       taskId: createdTasks[4].id,
-      changedBy: maria.id,
+      changedBy: admin.id,
       oldStatus: 'pending' as const,
       newStatus: 'in_progress' as const,
-    },
-    {
-      taskId: createdTasks[6].id,
-      changedBy: admin.id,
-      oldStatus: 'in_progress' as const,
-      newStatus: 'completed' as const,
     },
     {
       taskId: createdTasks[7].id,
