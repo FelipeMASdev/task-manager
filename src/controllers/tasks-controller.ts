@@ -32,7 +32,10 @@ class TasksController {
           error: 'Priority must be : low, medium or high',
         })
         .optional(),
-      assignedTo: z.number({ error: 'Assigned user ID must be a number' }).optional(),
+      assignedTo: z
+        .number({ error: 'Assigned user ID must be a number' })
+        .min(1, { error: 'Assigned user ID must be a positive number' })
+        .optional(),
     });
 
     const { title, description, priority, assignedTo } = taskSchema.parse(req.body);

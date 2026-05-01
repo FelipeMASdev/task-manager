@@ -1,5 +1,6 @@
 import { prisma } from '@/prisma.js';
 import { AppError } from '@/utils/AppError.js';
+import { Prisma } from '@/generated/prisma/client.js';
 
 export async function updateTeam(team: Team) {
   // Check if the team with the given ID exists
@@ -19,16 +20,25 @@ export async function updateTeam(team: Team) {
   }
 
   // Update team in the database
-  const updatedTeam = await prisma.team.update({
-    where: {
-      id: team.id,
-    },
-    data: {
-      ...(team.name !== undefined ? { name: team.name } : {}),
-      ...(team.description !== undefined ? { description: team.description } : {}),
-    },
-  });
+  try {
+    const updatedTeam = await prisma.team.update({
+      where: {
+        id: team.id,
+      },
+      data: {
+        ...(team.name !== undefined ? { name: team.name } : {}),
+        ...(team.description !== undefined ? { description: team.description } : {}),
+      },
+    });
 
-  // Return the updated team
-  return { ...updatedTeam };
+    // Return the updated team
+    return { ...updatedTeam };
+
+    // Check for unique constraint violation (e.g., duplicate team name)
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+      throw new AppError('Team with this name already exists', 409);
+    }
+    throw error;
+  }
 }
