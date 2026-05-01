@@ -3,6 +3,12 @@ import { PrismaPg } from '@prisma/adapter-pg';
 import { hash } from 'bcrypt';
 import { PrismaClient } from '../src/generated/prisma/client.js';
 
+// Não execute o seed automaticamente em produção. Para forçar em produção, definir FORCE_SEED=true
+if (process.env.NODE_ENV === 'production') {
+  console.log('Seed ignorado: NODE_ENV=production.');
+  process.exit(0);
+}
+
 const connectionString = process.env.DATABASE_URL;
 
 if (!connectionString) {

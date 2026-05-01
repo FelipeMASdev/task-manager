@@ -4,6 +4,7 @@ import { teamsRoutes } from './teams-routes.js';
 import { teamMembersRoutes } from './team-members-routes.js';
 import { tasksRoutes } from './tasks-routes.js';
 import { taskHistoryRoutes } from './task-history-routes.js';
+import { healthRoutes } from './health-routes.js';
 
 const routes = Router();
 
@@ -12,5 +13,7 @@ routes.use('/teams', teamsRoutes);
 routes.use('/teams/:teamID/members', teamMembersRoutes);
 routes.use('/teams/:teamID/tasks', tasksRoutes);
 routes.use('/teams/:teamID/tasks/:taskID', taskHistoryRoutes);
+
+routes.use('/health', healthRoutes);
 
 export { routes };
