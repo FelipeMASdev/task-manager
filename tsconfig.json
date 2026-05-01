@@ -12,10 +12,7 @@
       "@/*": ["./src/*"]
     },
 
-    "types": [
-      "node",
-      "jest"
-    ],
+    "typeRoots": ["./node_modules/@types"],
 
     "strict": true,
     "allowJs": true,
