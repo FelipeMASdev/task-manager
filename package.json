@@ -12,7 +12,7 @@
   "scripts": {
     "update": "npx npm-check-updates --interactive --format group",
     "dev": "nodemon",
-    "build": "tsc -p tsconfig.build.json && tsc-alias",
+    "build": "prisma generate && tsc -p tsconfig.build.json && tsc-alias",
     "start": "node build/server.js",
     "start:prod": "npm run prisma:migrate:deploy && npm start",
     "lint": "eslint src --ext .ts,.js,.json",
